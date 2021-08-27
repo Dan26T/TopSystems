@@ -1,0 +1,18 @@
+
+span {
+    margin-left: 1rem;
+    margin-top: 1rem
+}
+input  {
+    width: 300px;
+}
+
+.container {
+    width: 1100px;
+    margin: 0 auto;
+}
+ul {display: inline-block}
+
+.users:hover{
+    cursor: pointer;
+}
