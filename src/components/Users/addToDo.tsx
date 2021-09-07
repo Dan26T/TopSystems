@@ -1,12 +1,14 @@
 import React, {useState, useEffect, ChangeEvent} from 'react'
 import s from './user.module.css';
 import {ToDoType} from "../../reduxStore/userReducer";
+import {Button, Input} from 'antd';
 
 
 type PropsType ={
     id: number
     showMode: boolean
-    addNewTodo: (newTodo:ToDoType) => void
+    addNewTodo: (newTodo:ToDoType, condition:string) => void
+    setNewCondition: (newCondition:string) => void
 }
 
 export const AddToDo: React.FC<PropsType> = (props) => {
@@ -21,29 +23,53 @@ export const AddToDo: React.FC<PropsType> = (props) => {
     const newTodoText = (e: ChangeEvent<HTMLInputElement>) => {
         setTodoText(e.currentTarget.value)
     }
+    const clearCondition = () => setTimeout(() => props.setNewCondition(''), 3000)
     const add = (event: any) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && todoText) {
             let newTodo: ToDoType = {
                 userId: props.id,
                 title: todoText,
                 id: 202,
                 completed: false
             }
-            props.addNewTodo(newTodo)
+            props.addNewTodo(newTodo, 'success')
             setTodoText('')
             setEdit(false)
+            clearCondition()
+        }
+        if (event.key === 'Enter' && !todoText) {
+            props.setNewCondition('warning')
+            clearCondition()
+        }
+    }
+    const addCickF = () => {
+        if (todoText) {
+            let newTodoC: ToDoType = {
+                userId: props.id,
+                title: todoText,
+                id: 202,
+                completed: false
+            }
+            props.addNewTodo(newTodoC, 'success')
+            setTodoText('')
+            setEdit(false)
+            clearCondition()
+        } else {
+            props.setNewCondition('warning')
+            clearCondition()
         }
     }
     const close = () => {
         setEdit(false)
         setTodoText('')
     }
-    return <a className={`collection-item flow-text ${s.addM}`}>
-        {editMode && props.showMode ? <div className={s.inputS}><input className={s.inputS} type="text"
-                                                     onChange={newTodoText} onBlur={close} value={todoText} onKeyPress={add}/></div> :
-            <div className={s.buttonAdd}><button className='waves-effect cyan lighten-5 btn-small black-text'
-                          onClick={addTodo}>Добавить дело
-                <i className="material-icons blue-text">add_circle</i></button></div>}
+    return <>
+        {editMode && props.showMode ? <div style={{display: 'flex'}}><Input placeholder="Введите новое задание" type="text"
+                                                     onChange={newTodoText} value={todoText} onKeyPress={add}/>
+                    <Button onClick={addCickF}>Добавить</Button>
+                <Button onClick={close}>Закрыть</Button>
+        </div> :
+            <div><Button block onClick={addTodo}>Добавить дело</Button></div>}
 
-    </a>
+    </>
 }

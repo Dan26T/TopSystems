@@ -9,6 +9,7 @@ const SET_TODOS = 'SET_TODOS'
 const UPDATE_TODO = 'UPDATE_TODO'
 const SET_NEW_TODO = 'SET_NEW_TODO'
 const DELETE_TODO = 'DELETE_TODO'
+const SET_NEW_CONDITION = 'SET_NEW_CONDITION'
 
 export type UsersType = {
     id: number
@@ -34,7 +35,7 @@ type GeoType = {
 }
 type CompanyType = {
     name: string
-    catchPhrase:string
+    catchPhrase: string
     bs: string
 }
 
@@ -47,16 +48,18 @@ export type ToDoType = {
 export type InitialStateType = {
     users: Array<UsersType>
     todo: Array<ToDoType>
-    newToDo: string
+    newToDo: string,
+    condition: string | undefined
 }
 
 let initialState: InitialStateType = {
     users: [],
     todo: [],
-    newToDo: ""
+    newToDo: "",
+    condition: ''
 };
 
-type ActionsType = SetUsersACType | SetToDosACType | UpdateToDosACType | SetNewTodoACType | deleteToDoACType
+type ActionsType = SetUsersACType | SetToDosACType | UpdateToDosACType | SetNewTodoACType | deleteToDoACType | setNewConditionACType
 
 const PageReducer = (state: InitialStateType = initialState, action: ActionsType): InitialStateType => {
     switch (action.type) {
@@ -94,6 +97,13 @@ const PageReducer = (state: InitialStateType = initialState, action: ActionsType
                 ...state,
                 todo: [...state.todo.filter(t => t.id !== action.id)]
             }
+        case SET_NEW_CONDITION:
+            return {
+                ...state,
+                condition: action.condition
+
+            }
+
         default:
             return state;
     }
@@ -117,7 +127,12 @@ type UpdateToDosACType = {
     id: number
     userId: number
 }
-const updateToDosAC = (todoText: string, id: number, userId: number): UpdateToDosACType => ({type: UPDATE_TODO, todoText, id, userId})
+const updateToDosAC = (todoText: string, id: number, userId: number): UpdateToDosACType => ({
+    type: UPDATE_TODO,
+    todoText,
+    id,
+    userId
+})
 
 type SetNewTodoACType = {
     type: typeof SET_NEW_TODO
@@ -130,6 +145,12 @@ type deleteToDoACType = {
     id: number
 }
 const deleteToDo = (id: number, userId: number): deleteToDoACType => ({type: DELETE_TODO, id})
+
+type setNewConditionACType = {
+    type: typeof SET_NEW_CONDITION
+    condition: string
+}
+export const setNewCondition = (condition: string): setNewConditionACType => ({type: SET_NEW_CONDITION, condition})
 
 
 export const getUsers = () => {
@@ -150,22 +171,25 @@ export const updateTodo = (todoText: string, id: number, userId: number) => {
     return (dispatch: Dispatch<ActionsType>) => {
         userApi.updateToDo(todoText, id, userId).then(response => {
             dispatch(updateToDosAC(response.title, response.id, response.userId))
+            dispatch(setNewCondition('info'))
         })
     }
 }
-export const addNewTodo = (newTodo:ToDoType) => {
+export const addNewTodo = (newTodo: ToDoType) => {
     return (dispatch: Dispatch<ActionsType>) => {
         // @ts-ignore
         userApi.setNewToDo(newTodo.title, newTodo.userId).then(response => {
             let todo = {...response}
             dispatch(setNewTodo(todo))
+            dispatch(setNewCondition('success'))
         })
     }
 }
-export const deleteTodo = (id:number, userId: number) => {
+export const deleteTodo = (id: number, userId: number) => {
     return (dispatch: Dispatch<ActionsType>) => {
         userApi.deleteToDo(id).then(response => {
             dispatch(deleteToDo(id, userId))
+            dispatch(setNewCondition('error'))
         })
     }
 }

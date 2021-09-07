@@ -1,5 +1,11 @@
+import {Button, Col, Divider, Input, Row} from 'antd';
 import React, {useState, useEffect, ChangeEvent} from 'react'
 import s from './todo.module.css';
+import {
+    CheckCircleOutlined,
+    DeleteOutlined,
+    EditOutlined
+} from '@ant-design/icons';
 
 type PropsType = {
     title: string
@@ -7,6 +13,7 @@ type PropsType = {
     userId: number
     deleteTodo: (id:number, userId:number) => void
     updateToDo: (todoText: string, id:number, userId:number) => void
+    setNewCondition: (newCondition: string) => void
 }
 
 export const TodoList: React.FC<PropsType> = (props) => {
@@ -19,15 +26,20 @@ export const TodoList: React.FC<PropsType> = (props) => {
         setEdit(true)
     }
     const deactivateEditMode = () => {
-        debugger
         props.updateToDo(todoText, props.id, props.userId)
         setEdit(false)
+        props.setNewCondition('info')
+        clearCondition()
     }
+    const clearCondition = () => setTimeout(() => props.setNewCondition(''), 3000)
+
     const setToDo = (e: ChangeEvent<HTMLInputElement>) => {
         setTodoText(e.currentTarget.value)
     }
     const deleteTodo = () => {
         props.deleteTodo(props.id, props.userId)
+        props.setNewCondition('error')
+        clearCondition()
     }
     const out = (event: any) => {
         if (event.key === 'Enter') {
@@ -36,27 +48,34 @@ export const TodoList: React.FC<PropsType> = (props) => {
     }
 
 
-    return <li>
-        {!editMode ? <span>
+    return <li style={{marginTop: 20, listStyle: 'none'}}>
+        <Row>
+            <Col flex="1 1 200px">
+                {!editMode ? <span>
             {todoText}
-        </span> : <div className={s.inputS}>
-            <input onChange={setToDo} className='validate' type="text" placeholder='Введите текст' value={todoText}
-                   onKeyPress={out}
-            /></div>
-        }
-
-        {!editMode ? <span>
-                <button className='waves-effect cyan lighten-5 btn-small black-text' onClick={activateEditMode}>Изменить
-                <i className="material-icons blue-text">create</i></button>
-                <button className='waves-effect cyan lighten-5 btn-small black-text' onClick={deleteTodo}>Удалить
-                <i className="material-icons red-text">delete</i></button>
+        </span> : <div >
+                    <Input onChange={setToDo} className='validate' type="text" placeholder='Введите текст' value={todoText}
+                           onKeyPress={out}
+                    /></div>
+                }
+            </Col>
+            <Col flex="0 1 300px">
+                {!editMode ? <span>
+             <Button type="primary"  style={{marginRight: 10 }}
+                     onClick={activateEditMode}>Изменить <EditOutlined />
+                </Button>
+            <Button danger onClick={deleteTodo}>Удалить <DeleteOutlined /></Button>
                 </span>
-            : <div className={s.inputS}>
-                <button className='waves-effect cyan lighten-5 btn-small black-text'
-                        onClick={deactivateEditMode}>Сохранить
-                    <i className="material-icons green-text">check</i>
-                </button>
-            </div>}
+                    : <div>
+                        <Button style={{marginLeft: 5 }}
+                            onClick={deactivateEditMode}>Сохранить <CheckCircleOutlined />
+                        </Button>
+                    </div>}
+            </Col>
+        </Row>
+
+
+
 
     </li>
 }
